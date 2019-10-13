@@ -140,7 +140,7 @@ def train(
         
         #train_data = DataIterator(train_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)
         test_data = DataIterator(test_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)    
-        train_data = DataIterator(train_file, batch_size=batch_size, maxlen=minlen, minlen=minlen)
+        train_data = DataIterator(train_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)
         feature_num = pkl.load(open(feature_file))
         n_uid, n_mid = feature_num, feature_num
         BATCH_SIZE = batch_size
