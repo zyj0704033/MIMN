@@ -97,11 +97,11 @@ class DataIterator:
                 if userbehavior_len >= self.minlen and userbehavior_len <=self.maxlen:
                     source.append([uid, item_id, cate_id])
                     target.append([label, 1-label])
-                    hist_item_list.append(hist_item[-200:])
-                    hist_cate_list.append(hist_cate[-200:])
+                    hist_item_list.append(hist_item[-self.maxlen:])
+                    hist_cate_list.append(hist_cate[-self.maxlen:])
                     
-                    neg_item_list.append(neg_item[-200:])
-                    neg_cate_list.append(neg_cate[-200:])
+                    neg_item_list.append(neg_item[-self.maxlen:])
+                    neg_cate_list.append(neg_cate[-self.maxlen:])
                 
 
                 if len(source) >= self.batch_size or len(target) >= self.batch_size:

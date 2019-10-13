@@ -1,6 +1,6 @@
 #coding:utf-8
 import numpy
-from data_iterator import DataIterator
+from data_iterator_new import DataIterator
 import tensorflow as tf
 from model import *
 import time
@@ -139,8 +139,8 @@ def train(
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         
         #train_data = DataIterator(train_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)
-        test_data = DataIterator(test_file, batch_size=batch_size, maxlen=67, minlen=0)    
-        train_data = DataIterator(train_file, batch_size=batch_size, maxlen=200, minlen=0)
+        test_data = DataIterator(test_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)    
+        train_data = DataIterator(train_file, batch_size=batch_size, maxlen=minlen, minlen=minlen)
         feature_num = pkl.load(open(feature_file))
         n_uid, n_mid = feature_num, feature_num
         BATCH_SIZE = batch_size
