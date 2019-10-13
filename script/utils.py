@@ -371,7 +371,7 @@ def dist_matrix(inputs, dist_type='Euclid'):
     shape = inputs.shape.as_list()
     if dist_type == 'Euclid':
         square_input = tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True) # b * seq_len * 1
-        tf_ones = tf.cotnsant(np.ones((shape[0], shape[1], 1)), dtype=tf.float32) # b * seq_len * 1
+        tf_ones = tf.constant(np.ones((shape[0], shape[1], 1)), dtype=tf.float32) # b * seq_len * 1
         sqx = tf.concat([square_input, tf_ones], axis=2)
         sqy = tf.concat([tf_ones, square_input], axis=2)
         # sqy = tf.reshape(sqy, [shape[0], 2, shape[1]])
