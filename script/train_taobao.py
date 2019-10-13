@@ -153,7 +153,7 @@ def train(
         elif model_type == 'PNN': 
             model = Model_PNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'MIND': 
-            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num)
+            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num, is_attention=True, use_mask=False)
         elif model_type == 'GRU4REC': 
             model = Model_GRU4REC(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'DIN': 
