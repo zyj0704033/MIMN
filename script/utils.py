@@ -8,6 +8,7 @@ from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import array_ops
 from tensorflow.python.ops import variable_scope as vs
 from keras import backend as K
+import numpy as np
 
 def din_attention(query, facts, attention_size, mask=None, stag='null', mode='SUM', softmax_stag=1, time_major=False, return_alphas=False):
     if isinstance(facts, tuple):
@@ -364,3 +365,113 @@ def din_fcn_shine(query, facts, attention_size, mask, stag='null', mode='SUM', s
     output = d_layer_2_all
     return output
 
+
+def dist_matrix(inputs, dist_type='Euclid'):
+    # inputs : b * seq_len * embed_dim
+    shape = inputs.shape.as_list()
+    if dist_type == 'Euclid':
+        square_input = tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True) # b * seq_len * 1
+        tf_ones = tf.cotnsant(np.ones((shape[0], shape[1], 1)), dtype=tf.float32) # b * seq_len * 1
+        sqx = tf.concat([square_input, tf_ones], axis=2)
+        sqy = tf.concat([tf_ones, square_input], axis=2)
+        # sqy = tf.reshape(sqy, [shape[0], 2, shape[1]])
+        square_matrix = tf.matmul(sqx, sqy, transpose_b=True) # b * seq_len * seq_len()
+        xy = tf.matmul(inputs, inputs, transpose_b=True) 
+        dis_matrix = square_matrix - 2*xy + tf.constant(1e-8, dtype=tf.float32)
+        dis_matrix = tf.sqrt(dis_matrix)
+
+        return dis_matrix
+
+
+
+
+
+def cal_cluster_loss(inputs, dist_type='Euclid'):
+    '''
+    calculate the sum of Lapalace Matrix eigen value as cluster loss
+    
+    inputs: b * seq_len * embed_dim
+    return: scalar cluster_loss
+    '''
+    shape = inputs.shape.as_list()
+    W = dist_matrix(inputs, dist_type=dist_type) # b * seq_len * seq_len
+    degree = tf.reduce_sum(W, axis=2) # b * seq_len
+    degree = tf.reshape(degree, [shape[0], shape[1], 1]) # b * seq_len * 1
+    tf_eye = tf.eye(shape[1], batch_shape=[shape[0]]) # b * seq_len * seq_len
+    D = tf.multiply(degree, tf_eye)
+    D_norm =tf.multiply(1 / tf.sqrt(degree), tf_eye) # b * seq_len * seq_len
+    L = D - W
+    L = tf.matmul(D_norm, L)
+    L = tf.matmul(L, D_norm)
+    # with tf.device('cpu'):
+    #    s = tf.svd(L, compute_uv=False)
+    # s, v = tf.self_adjoint_eig(L)
+    s = L[:,:,0]
+    return s[:,0] # b
+'''
+def matrix_symmetric(x):
+    return (x + tf.transpose(x, [0,2,1])) / 2
+
+def get_eigen_K(x, square=False):
+    """
+    Get K = 1 / (sigma_i - sigma_j) for i != j, 0 otherwise
+
+    Parameters
+    ----------
+    x : tf.Tensor with shape as [..., dim,]
+
+    Returns
+    -------
+
+    """
+    if square:
+        x = tf.square(x)
+    res = tf.expand_dims(x, 1) - tf.expand_dims(x, 2)
+    res += tf.eye(tf.shape(res)[1])
+    res = 1 / res
+    res -= tf.eye(tf.shape(res)[1])
+
+    # Keep the results clean
+    res = tf.where(tf.is_nan(res), tf.zeros_like(res), res)
+    res = tf.where(tf.is_inf(res), tf.zeros_like(res), res)
+    return res
+
+@tf.RegisterGradient('Svd')
+def gradient_svd(op, grad_s, grad_u, grad_v):
+    """
+    Define the gradient for SVD
+    References
+        Ionescu, C., et al, Matrix Backpropagation for Deep Networks with Structured Layers
+        
+    Parameters
+    ----------
+    op
+    grad_s
+    grad_u
+    grad_v
+
+    Returns
+    -------
+    """
+    s, u, v = op.outputs
+    v_t = tf.transpose(v, [0,2,1])
+
+    with tf.name_scope('K'):
+        K = get_eigen_K(s, True)
+    inner = matrix_symmetric(K * tf.matmul(v_t, grad_v))
+
+    # Create the shape accordingly.
+    u_shape = u.get_shape()[1].value
+    v_shape = v.get_shape()[1].value
+
+    # Recover the complete S matrices and its gradient
+    eye_mat = tf.eye(v_shape, u_shape)
+    realS = tf.matmul(tf.reshape(tf.matrix_diag(s), [-1, v_shape]), eye_mat)
+    realS = tf.transpose(tf.reshape(realS, [-1, v_shape, u_shape]), [0, 2, 1])
+
+    real_grad_S = tf.matmul(tf.reshape(tf.matrix_diag(grad_s), [-1, v_shape]), eye_mat)
+    real_grad_S = tf.transpose(tf.reshape(real_grad_S, [-1, v_shape, u_shape]), [0, 2, 1])
+
+    dxdz = tf.matmul(u, tf.matmul(2 * tf.matmul(realS, inner) + real_grad_S, v_t))
+    return dxdz
+'''

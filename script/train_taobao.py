@@ -18,6 +18,12 @@ parser.add_argument('--model_type', type=str, default='none', help='DIEN | MIMN 
 parser.add_argument('--memory_size', type=int, default=4)
 parser.add_argument('--mem_induction', type=int, default=0, help='0:false|1:true')
 parser.add_argument('--util_reg', type=int, default=0, help='0:false|1:true')
+parser.add_argument('--seq_maxlen', type=int, default=200, help='max len of user behavior seq')
+parser.add_argument('--seq_minlen', type=int, default=0, help='min len of user behavior seq for filler sample')
+parser.add_argument('--cluster_num', type=int, default=3, help='cluster num for capsule')
+parser.add_argument('--start_test_iter', type=int, default=1000, help='the iter start to test')
+parser.add_argument('--test_iter', type=int, default=100, help='the iter start to test')
+parser.add_argument('--epoch', type=int, default=1, help='epoch num')
 
 
 def generator_queue(generator, max_q_size=20,
@@ -111,12 +117,16 @@ def train(
         feature_file = "../UIC_MIMN/data/taobao_data/taobao_feature.pkl",
         batch_size = 256,
         maxlen = 200,
+        minlen = 0,
         test_iter = 100,
         save_iter = 100,
         model_type = 'DNN',
         Memory_Size = 4,
         Mem_Induction = 0, 
-        Util_Reg = 0
+        Util_Reg = 0,
+        cluster_num = 3,
+        start_test_iter = 1000,
+        epoch = 1
 ):
     if model_type != "MIMN" or model_type != "MIMN_with_aux":
         model_path = "dnn_save_path/book_ckpt_noshuff" + model_type
@@ -128,9 +138,9 @@ def train(
 
     with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         
-        train_data = DataIterator(train_file, batch_size, maxlen)
-        test_data = DataIterator(test_file, batch_size, maxlen)    
-        
+        #train_data = DataIterator(train_file, batch_size=batch_size, maxlen=maxlen, minlen=minlen)
+        test_data = DataIterator(test_file, batch_size=batch_size, maxlen=67, minlen=0)    
+        train_data = DataIterator(train_file, batch_size=batch_size, maxlen=200, minlen=0)
         feature_num = pkl.load(open(feature_file))
         n_uid, n_mid = feature_num, feature_num
         BATCH_SIZE = batch_size
@@ -138,8 +148,12 @@ def train(
 
         if model_type == 'DNN': 
             model = Model_DNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
+        elif model_type == 'CDNN': 
+            model = Model_CDNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'PNN': 
             model = Model_PNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
+        elif model_type == 'MIND': 
+            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num)
         elif model_type == 'GRU4REC': 
             model = Model_GRU4REC(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'DIN': 
@@ -170,7 +184,7 @@ def train(
         start_time = time.time()
         iter = 0
         lr = 0.001
-        for itr in range(1):
+        for itr in range(epoch):
             print("epoch"+str(itr))
             loss_sum = 0.0
             accuracy_sum = 0.
@@ -190,8 +204,10 @@ def train(
                 aux_loss_sum += aux_loss
                 iter += 1
                 sys.stdout.flush()
-#                if iter < 2500:
-#                    continue
+                if (iter % 200 ) == 0:
+                    print("iter: %d" %iter)
+                if iter < start_test_iter:
+                    continue
                 if (iter % test_iter) == 0:
                     print('iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f' % \
                                           (iter, loss_sum / test_iter, accuracy_sum / test_iter,  aux_loss_sum / test_iter))
@@ -233,13 +249,17 @@ def test(
         BATCH_SIZE = batch_size
         SEQ_LEN = maxlen
 
-
+        print("******start to test  " + model_type + "  **********")
         if model_type == 'DNN': 
             model = Model_DNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
+        elif model_type == 'CDNN': 
+            model = Model_CDNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'PNN': 
             model = Model_PNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'GRU4REC': 
             model = Model_GRU4REC(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
+        elif model_type == 'MIND': 
+            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'DIN': 
             model = Model_DIN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'ARNN': 
@@ -269,13 +289,20 @@ if __name__ == '__main__':
     Memory_Size = args.memory_size
     Mem_Induction = args.mem_induction
     Util_Reg = args.util_reg
+    seq_maxlen = args.seq_maxlen
+    seq_minlen = args.seq_minlen
+    cluster_num =  args.cluster_num
+    start_test_iter = args.start_test_iter
+    test_iter = args.test_iter
+    epoch = args.epoch
 
     tf.set_random_seed(SEED)
     numpy.random.seed(SEED)
     random.seed(SEED)
+    print("\33[33m Model_type:%s   seq_maxlen:%d   seq_minlen:%d   cluster_num:%d \33[0m" %(Model_Type, seq_maxlen, seq_minlen, cluster_num))
 
     if args.p == 'train':
-        train(model_type=Model_Type, Memory_Size=Memory_Size, Mem_Induction=Mem_Induction, Util_Reg=Util_Reg)
+        train(model_type=Model_Type, Memory_Size=Memory_Size, Mem_Induction=Mem_Induction, Util_Reg=Util_Reg, maxlen=seq_maxlen, minlen=seq_minlen, cluster_num=cluster_num, start_test_iter=start_test_iter, test_iter=test_iter, epoch=epoch)
     elif args.p == 'test':
         test(model_type=Model_Type, Memory_Size=Memory_Size, Mem_Induction=Mem_Induction, Util_Reg=Util_Reg)
     else:
