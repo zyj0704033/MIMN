@@ -406,8 +406,29 @@ def cal_cluster_loss(inputs, dist_type='Euclid'):
     # with tf.device('cpu'):
     #    s = tf.svd(L, compute_uv=False)
     # s, v = tf.self_adjoint_eig(L)
-    s = L[:,:,0]
-    return s[:,0] # b
+    # s = L[:,:,0]
+    s = power_iteration(L)
+    s = tf.reshape(s, [shape[0]])
+    return -s # b
+
+def power_iteration(L, iteration=10):
+    shape = L.shape.as_list() # b * seq_len * seq_len
+    u = tf.get_variable("u", [shape[0], 1, shape[-1]], initializer=tf.random_normal_initializer(), trainable=False) # b * 1 * seq_len
+    u_hat = u
+    v_hat = None
+    for i in range(iteration):
+        v_ = tf.matmul(u_hat, L, transpose_b=True)
+        v_hat = tf.nn.l2_normalize(v_)
+
+        u_ = tf.matmul(v_hat, L)
+        u_hat = tf.nn.l2_normalize(u_)
+    
+    u_hat = tf.stop_gradient(u_hat)
+    v_hat = tf.stop_gradient(v_hat)
+    sigma = tf.matmul(tf.matmul(v_hat, L), u_hat, transpose_b=True)
+
+    return sigma
+
 '''
 def matrix_symmetric(x):
     return (x + tf.transpose(x, [0,2,1])) / 2
