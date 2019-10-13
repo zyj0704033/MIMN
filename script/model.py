@@ -394,7 +394,7 @@ class Model_MIND(Model):
         cap_output = cap(self.item_his_eb)
         print(cap_output.shape) #(b, 3, 18)
         if is_attention:
-            cap_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num, 1)), dtype=tf.float32)
+            cap_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num)), dtype=tf.float32)
             cap_output = din_attention(self.item_eb, cap_output, HIDDEN_SIZE, cap_mask)
         cap_sum = tf.reduce_sum(cap_output, 1)
         inp = tf.concat([self.item_eb, self.item_his_eb_sum, cap_sum], 1)
