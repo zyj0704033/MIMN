@@ -106,9 +106,9 @@ def eval(sess, test_data, model, model_path, batch_size):
     return test_auc, loss_sum, accuracy_sum, aux_loss_sum
 
 def train(
-        train_file = "./data/taobao_data/taobao_train.txt",
-        test_file = "./data/taobao_data/taobao_test.txt",
-        feature_file = "./data/taobao_data/taobao_feature.pkl",
+        train_file = "../UIC_MIMN/data/taobao_data/taobao_train.txt",
+        test_file = "../UIC_MIMN/data/taobao_data/taobao_test.txt",
+        feature_file = "../UIC_MIMN/data/taobao_data/taobao_feature.pkl",
         batch_size = 256,
         maxlen = 200,
         test_iter = 100,
@@ -195,7 +195,7 @@ def train(
                 if (iter % test_iter) == 0:
                     print('iter: %d ----> train_loss: %.4f ---- train_accuracy: %.4f ---- train_aux_loss: %.4f' % \
                                           (iter, loss_sum / test_iter, accuracy_sum / test_iter,  aux_loss_sum / test_iter))
-                    print('                                                                                          test_auc: %.4f ----test_loss: %.4f ---- test_accuracy: %.4f ---- test_aux_loss: %.4f' % eval(sess, test_data, model, best_model_path, batch_size))
+                    print('test_auc: %.4f ----test_loss: %.4f ---- test_accuracy: %.4f ---- test_aux_loss: %.4f' % eval(sess, test_data, model, best_model_path, batch_size))
                     loss_sum = 0.0
                     accuracy_sum = 0.0
                     aux_loss_sum = 0.0

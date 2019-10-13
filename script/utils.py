@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.ops.rnn_cell import *
-from tensorflow.python.ops.rnn_cell_impl import  _Linear
+#from tensorflow.python.ops.rnn_cell_impl import  _Linear
+from tensorflow.contrib.rnn.python.ops.core_rnn_cell import _linear
 from tensorflow import keras
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import init_ops
@@ -100,7 +101,7 @@ class VecAttGRUCell(RNNCell):
       if self._bias_initializer is None:
         bias_ones = init_ops.constant_initializer(1.0, dtype=inputs.dtype)
       with vs.variable_scope("gates"):  # Reset gate and update gate.
-        self._gate_linear = _Linear(
+        self._gate_linear = _linear(
             [inputs, state],
             2 * self._num_units,
             True,
@@ -113,7 +114,7 @@ class VecAttGRUCell(RNNCell):
     r_state = r * state
     if self._candidate_linear is None:
       with vs.variable_scope("candidate"):
-        self._candidate_linear = _Linear(
+        self._candidate_linear = _linear(
             [inputs, r_state],
             self._num_units,
             True,

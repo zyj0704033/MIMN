@@ -4,13 +4,16 @@ from utils import *
 from tensorflow.python.ops.rnn_cell import GRUCell
 import mimn as mimn
 import rum as rum
-from rnn import dynamic_rnn 
+from rnn import dynamic_rnn
+from capsule import Capsule_cell
+import numpy as np 
 # import mann_simple_cell as mann_cell
 class Model(object):
     def __init__(self, n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, use_negsample=False, Flag="DNN"):
         self.model_flag = Flag
         self.reg = False
         self.use_negsample= use_negsample
+        self.use_specloss = None
         with tf.name_scope('Inputs'):
             self.mid_his_batch_ph = tf.placeholder(tf.int32, [None, None], name='mid_his_batch_ph')
             self.cate_his_batch_ph = tf.placeholder(tf.int32, [None, None], name='cate_his_batch_ph')
@@ -68,6 +71,10 @@ class Model(object):
             # Cross-entropy loss and optimizer initialization
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
+            if self.use_specloss:
+                self.loss += self.spectral_loss
+                print("add spectral_loss")
+                print(self.spectral_loss.shape.as_list())
             if self.use_negsample:
                 self.loss += self.aux_loss
             if self.reg:
@@ -373,4 +380,32 @@ class Model_MIMN(Model):
         else:
             inp = tf.concat([self.item_eb, self.item_his_eb_sum, read_out, mean_memory*self.item_eb], 1)
 
-        self.build_fcn_net(inp, use_dice=False) 
+        self.build_fcn_net(inp, use_dice=False)
+
+
+class Model_MIND(Model):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=3, is_attention=False, use_mask=False):
+        super(Model_MIND, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
+                                           BATCH_SIZE, SEQ_LEN, Flag="MIND")
+        if use_mask:
+            cap = Capsule_cell(cluster_num, EMBEDDING_DIM, mask=self.mask)
+        else:
+            cap = Capsule_cell(cluster_num, EMBEDDING_DIM)
+        cap_output = cap(self.item_his_eb)
+        print(cap_output.shape) #(b, 3, 18)
+        if is_attention:
+            cap_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num, 1)), dtype=tf.float32)
+            cap_output = din_attention(self.item_eb, cap_output, HIDDEN_SIZE, cap_mask)
+        cap_sum = tf.reduce_sum(cap_output, 1)
+        inp = tf.concat([self.item_eb, self.item_his_eb_sum, cap_sum], 1)
+        self.build_fcn_net(inp, use_dice=False)
+
+class Model_CDNN(Model):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, use_specloss=True):
+        super(Model_CDNN, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
+                                           BATCH_SIZE, SEQ_LEN, Flag="DNN")
+        self.use_specloss = use_specloss
+        if self.use_specloss:
+            self.spectral_loss = cal_cluster_loss(self.item_his_eb)
+        inp = tf.concat([self.item_eb, self.item_his_eb_sum], 1)
+        self.build_fcn_net(inp, use_dice=False)

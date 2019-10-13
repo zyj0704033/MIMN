@@ -1,0 +1,3 @@
+*.pyc
+dnn_best_model
+dnn_save_path
