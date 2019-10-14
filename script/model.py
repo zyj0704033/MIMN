@@ -406,6 +406,6 @@ class Model_CDNN(Model):
                                            BATCH_SIZE, SEQ_LEN, Flag="DNN")
         self.use_specloss = use_specloss
         if self.use_specloss:
-            self.spectral_loss = cal_cluster_loss(self.item_his_eb)
+            self.spectral_loss = cal_cluster_loss(self.item_his_eb, self.mask)
         inp = tf.concat([self.item_eb, self.item_his_eb_sum], 1)
         self.build_fcn_net(inp, use_dice=False)

@@ -366,9 +366,12 @@ def din_fcn_shine(query, facts, attention_size, mask, stag='null', mode='SUM', s
     return output
 
 
-def dist_matrix(inputs, dist_type='Euclid'):
+def dist_matrix(inputs, mask, dist_type='Euclid'):
     # inputs : b * seq_len * embed_dim
     shape = inputs.shape.as_list()
+    mask = tf.reshape(mask, [shape[0], shape[1], 1])
+    if mask is not None:
+        inputs = tf.multiply(inputs, mask)
     if dist_type == 'Euclid':
         square_input = tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True) # b * seq_len * 1
         tf_ones = tf.constant(np.ones((shape[0], shape[1], 1)), dtype=tf.float32) # b * seq_len * 1
@@ -386,7 +389,7 @@ def dist_matrix(inputs, dist_type='Euclid'):
 
 
 
-def cal_cluster_loss(inputs, dist_type='Euclid'):
+def cal_cluster_loss(inputs, mask, dist_type='Euclid'):
     '''
     calculate the sum of Lapalace Matrix eigen value as cluster loss
     
@@ -394,7 +397,7 @@ def cal_cluster_loss(inputs, dist_type='Euclid'):
     return: scalar cluster_loss
     '''
     shape = inputs.shape.as_list()
-    W = dist_matrix(inputs, dist_type=dist_type) # b * seq_len * seq_len
+    W = dist_matrix(inputs, mask ,dist_type=dist_type) # b * seq_len * seq_len
     degree = tf.reduce_sum(W, axis=2) # b * seq_len
     degree = tf.reshape(degree, [shape[0], shape[1], 1]) # b * seq_len * 1
     tf_eye = tf.eye(shape[1], batch_shape=[shape[0]]) # b * seq_len * seq_len
