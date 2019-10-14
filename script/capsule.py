@@ -31,6 +31,7 @@ class Capsule_cell(object):
         if self.mask is not None:
             mask = tf.reshape(self.mask, [shape[0], shape[1], 1, 1, 1])
             u_hat = tf.multiply(u_hat, mask) #mask
+            bIJ = tf.multiply(bIJ, mask)
         u_hat_stop = tf.stop_gradient(u_hat, name='stop_gradient') # (b, seq_len, num_outputs, oemb_dim, 1)
 
         for r_iter in range(self.routing_iter):
