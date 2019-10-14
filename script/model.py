@@ -169,7 +169,7 @@ class Model(object):
 
     def calculate(self, sess, inps):
         if self.use_specloss:
-            loss, spec_loss, accuracy, _ = sess.run([self.loss, self.spectral_loss, self.accuracy, self.optimizer], feed_dict={
+            loss, spec_loss, accuracy = sess.run([self.loss, self.spectral_loss, self.accuracy, self.optimizer], feed_dict={
                 self.uid_batch_ph: inps[0],
                 self.mid_batch_ph: inps[1],
                 self.cate_batch_ph: inps[2],
