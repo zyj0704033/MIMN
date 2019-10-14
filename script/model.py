@@ -71,10 +71,12 @@ class Model(object):
             # Cross-entropy loss and optimizer initialization
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
+            gamma = 1
             if self.use_specloss:
-                self.loss += tf.reduce_mean(self.spectral_loss) * 1
+                self.loss += tf.reduce_mean(self.spectral_loss) * gamma
                 print("add spectral_loss")
                 print(self.spectral_loss.shape.as_list())
+                self.spectral_loss = tf.reduce_mean(self.spectral_loss) * gamma
             if self.use_negsample:
                 self.loss += self.aux_loss
             if self.reg:
@@ -126,7 +128,21 @@ class Model(object):
         return embedding                                 
     
     def train(self, sess, inps):
-        if self.use_negsample:
+        if self.use_specloss:
+            loss, spec_loss, accuracy, _ = sess.run([self.loss, self.spectral_loss, self.accuracy, self.optimizer], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cate_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cate_his_batch_ph: inps[4],
+                self.mid_neg_batch_ph: inps[5],
+                self.cate_neg_batch_ph: inps[6],
+                self.mask: inps[7],
+                self.target_ph: inps[8],
+                self.lr: inps[9]
+            })
+            aux_loss = spec_loss
+        elif self.use_negsample:
             loss, aux_loss, accuracy, _ = sess.run([self.loss, self.aux_loss, self.accuracy, self.optimizer], feed_dict={
                 self.uid_batch_ph: inps[0],
                 self.mid_batch_ph: inps[1],
@@ -154,6 +170,20 @@ class Model(object):
         return loss, accuracy, aux_loss            
 
     def calculate(self, sess, inps):
+        if self.use_specloss:
+            loss, spec_loss, accuracy, _ = sess.run([self.loss, self.spectral_loss, self.accuracy, self.optimizer], feed_dict={
+                self.uid_batch_ph: inps[0],
+                self.mid_batch_ph: inps[1],
+                self.cate_batch_ph: inps[2],
+                self.mid_his_batch_ph: inps[3],
+                self.cate_his_batch_ph: inps[4],
+                self.mid_neg_batch_ph: inps[5],
+                self.cate_neg_batch_ph: inps[6],
+                self.mask: inps[7],
+                self.target_ph: inps[8],
+                self.lr: inps[9]
+            })
+            aux_loss = spec_loss
         if self.use_negsample:
             probs, loss, accuracy, aux_loss = sess.run([self.y_hat, self.loss, self.accuracy, self.aux_loss], feed_dict={
                 self.uid_batch_ph: inps[0],
