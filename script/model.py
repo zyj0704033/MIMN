@@ -135,8 +135,6 @@ class Model(object):
                 self.cate_batch_ph: inps[2],
                 self.mid_his_batch_ph: inps[3],
                 self.cate_his_batch_ph: inps[4],
-                self.mid_neg_batch_ph: inps[5],
-                self.cate_neg_batch_ph: inps[6],
                 self.mask: inps[7],
                 self.target_ph: inps[8],
                 self.lr: inps[9]
@@ -177,8 +175,6 @@ class Model(object):
                 self.cate_batch_ph: inps[2],
                 self.mid_his_batch_ph: inps[3],
                 self.cate_his_batch_ph: inps[4],
-                self.mid_neg_batch_ph: inps[5],
-                self.cate_neg_batch_ph: inps[6],
                 self.mask: inps[7],
                 self.target_ph: inps[8],
                 self.lr: inps[9]
@@ -433,7 +429,7 @@ class Model_MIND(Model):
 class Model_CDNN(Model):
     def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, use_specloss=True):
         super(Model_CDNN, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
-                                           BATCH_SIZE, SEQ_LEN, Flag="DNN")
+                                           BATCH_SIZE, SEQ_LEN, Flag="CDNN")
         self.use_specloss = use_specloss
         if self.use_specloss:
             self.spectral_loss = cal_cluster_loss(self.item_his_eb, self.mask)
