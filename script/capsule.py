@@ -7,7 +7,7 @@ class Capsule_cell(object):
         self.emb_dim = emb_dim
         self.mask = mask # (b, seq_len, 1)
         self.bIJ = bIJ
-        self.routing_iter = 3
+        self.routing_iter = routing_iter
     
     def __call__(self, input):
         # input (b, seq_len, emb_dim)

@@ -388,9 +388,9 @@ class Model_MIND(Model):
         super(Model_MIND, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
                                            BATCH_SIZE, SEQ_LEN, Flag="MIND")
         if use_mask:
-            cap = Capsule_cell(cluster_num, 2 * EMBEDDING_DIM, mask=self.mask)
+            cap = Capsule_cell(cluster_num, EMBEDDING_DIM, mask=self.mask)
         else:
-            cap = Capsule_cell(cluster_num, 2 * EMBEDDING_DIM)
+            cap = Capsule_cell(cluster_num, EMBEDDING_DIM)
         cap_output = cap(self.item_his_eb)
         print(cap_output.shape) #(b, 3, 18)
         if is_attention:
