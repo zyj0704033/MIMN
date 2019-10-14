@@ -72,7 +72,7 @@ class Model(object):
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
             if self.use_specloss:
-                self.loss += tf.reduce_mean(self.spectral_loss) * 0.2
+                self.loss += tf.reduce_mean(self.spectral_loss) * 1
                 print("add spectral_loss")
                 print(self.spectral_loss.shape.as_list())
             if self.use_negsample:

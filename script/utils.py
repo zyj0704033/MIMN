@@ -377,7 +377,7 @@ def dist_matrix(inputs, dist_type='Euclid'):
         # sqy = tf.reshape(sqy, [shape[0], 2, shape[1]])
         square_matrix = tf.matmul(sqx, sqy, transpose_b=True) # b * seq_len * seq_len()
         xy = tf.matmul(inputs, inputs, transpose_b=True) 
-        dis_matrix = square_matrix - 2*xy + tf.constant(1e-8, dtype=tf.float32)
+        dis_matrix = square_matrix - 2*xy + tf.constant(1e-6, dtype=tf.float32)
         dis_matrix = tf.sqrt(dis_matrix)
 
         return dis_matrix
