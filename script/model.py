@@ -176,7 +176,7 @@ class Model(object):
                 self.mid_his_batch_ph: inps[3],
                 self.cate_his_batch_ph: inps[4],
                 self.mask: inps[7],
-                self.target_ph: inps[8],
+                self.target_ph: inps[8]
             })
             aux_loss = spec_loss
         if self.use_negsample:
