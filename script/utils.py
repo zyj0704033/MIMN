@@ -386,6 +386,22 @@ def dist_matrix(inputs, mask, dist_type='Euclid'):
         return dis_matrix
 
 
+def get_eigenvec(inputs, mask, use_svd=False):
+    '''
+    calculate eigenvec
+
+    inputs: b * seq_len * embed_dim
+    mask: 
+    return: b * embed
+    '''
+    shape = inputs.shape.as_list()
+    mask = tf.reshape(mask, [shape[0], shape[1], 1])
+    inputs = tf.multiply(inputs, mask)
+    inputs =  tf.matmul(inputs, inputs, transpose_a=True) # b * embed * embed
+    eigvec = power_iteration(inputs)[1]
+    eigvec = tf.reshape(eigvec, [shape[0], shape[-1]])
+    
+    return eigvec
 
 
 
@@ -410,11 +426,15 @@ def cal_cluster_loss(inputs, mask, dist_type='Euclid', use_svd=False):
         s = tf.svd(L, compute_uv=False)
         s = s[:,0]
     else:
-        s = power_iteration(L)
+        s = power_iteration(L)[0]
         s = tf.reshape(s, [shape[0]])
     return -s # b
 
 def power_iteration(L, iteration=10):
+    '''
+    power iteration to calculate eigenvalue and eigenvector
+    ref: https://github.com/taki0112/Spectral_Normalization-Tensorflow/blob/master/spectral_norm.py
+    '''
     shape = L.shape.as_list() # b * seq_len * seq_len
     u = tf.get_variable("u", [shape[0], 1, shape[-1]], initializer=tf.random_normal_initializer(), trainable=False) # b * 1 * seq_len
     u_hat = u
@@ -430,7 +450,7 @@ def power_iteration(L, iteration=10):
     # v_hat = tf.stop_gradient(v_hat)
     sigma = tf.matmul(tf.matmul(v_hat, L), u_hat, transpose_b=True)
 
-    return sigma
+    return sigma, u_hat
 
 '''
 def matrix_symmetric(x):

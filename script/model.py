@@ -217,11 +217,14 @@ class Model(object):
         print('model restored from %s' % path)
 
 class Model_DNN(Model):
-    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, add_eigvec=True):
         super(Model_DNN, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
                                            BATCH_SIZE, SEQ_LEN, Flag="DNN")
-        
-        inp = tf.concat([self.item_eb, self.item_his_eb_sum], 1)
+        if add_eigvec:
+            eigvec = get_eigenvec(self.item_his_eb, self.mask)
+            inp = tf.concat([self.item_eb, self.item_his_eb_sum, eigvec], 1)
+        else:   
+            inp = tf.concat([self.item_eb, self.item_his_eb_sum], 1)
         self.build_fcn_net(inp, use_dice=False)
         
 
