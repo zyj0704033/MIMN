@@ -71,7 +71,7 @@ class Model(object):
             # Cross-entropy loss and optimizer initialization
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
-            gamma = 1
+            gamma = 0.5
             if self.use_specloss:
                 self.loss += tf.reduce_mean(self.spectral_loss) * gamma
                 print("add spectral_loss")

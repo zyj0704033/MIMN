@@ -119,7 +119,7 @@ def train(
         maxlen = 200,
         minlen = 0,
         test_iter = 100,
-        save_iter = 100,
+        save_iter = 9999999,
         model_type = 'DNN',
         Memory_Size = 4,
         Mem_Induction = 0, 
