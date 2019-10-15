@@ -389,7 +389,7 @@ def dist_matrix(inputs, mask, dist_type='Euclid'):
 
 
 
-def cal_cluster_loss(inputs, mask, dist_type='Euclid'):
+def cal_cluster_loss(inputs, mask, dist_type='Euclid', use_svd=False):
     '''
     calculate the sum of Lapalace Matrix eigen value as cluster loss
     
@@ -406,12 +406,12 @@ def cal_cluster_loss(inputs, mask, dist_type='Euclid'):
     L = D - W
     L = tf.matmul(D_norm, L)
     L = tf.matmul(L, D_norm)
-    # with tf.device('cpu'):
-    #    s = tf.svd(L, compute_uv=False)
-    # s, v = tf.self_adjoint_eig(L)
-    # s = L[:,:,0]
-    s = power_iteration(L)
-    s = tf.reshape(s, [shape[0]])
+    if use_svd:
+        s = tf.svd(L, compute_uv=False)
+        s = s[:,0]
+    else:
+        s = power_iteration(L)
+        s = tf.reshape(s, [shape[0]])
     return -s # b
 
 def power_iteration(L, iteration=10):
@@ -421,10 +421,10 @@ def power_iteration(L, iteration=10):
     v_hat = None
     for i in range(iteration):
         v_ = tf.matmul(u_hat, L, transpose_b=True)
-        v_hat = tf.nn.l2_normalize(v_)
+        v_hat = tf.nn.l2_normalize(v_, dim=0)
 
         u_ = tf.matmul(v_hat, L)
-        u_hat = tf.nn.l2_normalize(u_)
+        u_hat = tf.nn.l2_normalize(u_, dim=0)
     
     # u_hat = tf.stop_gradient(u_hat)
     # v_hat = tf.stop_gradient(v_hat)
