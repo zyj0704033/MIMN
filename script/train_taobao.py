@@ -190,6 +190,7 @@ def train(
             accuracy_sum = 0.
             aux_loss_sum = 0.
             train_data_pool,_stop,_ = generator_queue(train_data)
+            gamma = 0
             while True:
                 if  _stop.is_set() and train_data_pool.empty():
                     break
@@ -198,7 +199,7 @@ def train(
                 else:
                     continue
                 nick_id, item_id, cate_id, label, hist_item, hist_cate, neg_item, neg_cate, hist_mask = prepare_data(src, tgt)
-                loss, acc, aux_loss = model.train(sess, [nick_id, item_id, cate_id, hist_item, hist_cate, neg_item, neg_cate, hist_mask, label, lr])
+                loss, acc, aux_loss = model.train(sess, [nick_id, item_id, cate_id, hist_item, hist_cate, neg_item, neg_cate, hist_mask, label, lr, gamma])
                 loss_sum += loss
                 accuracy_sum += acc
                 aux_loss_sum += aux_loss
@@ -206,6 +207,8 @@ def train(
                 sys.stdout.flush()
                 if (iter % 200 ) == 0:
                     print("iter: %d" %iter)
+                if iter > 2000:
+                    gamma = 1
                 if iter < start_test_iter:
                     continue
                 if (iter % test_iter) == 0:

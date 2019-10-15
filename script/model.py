@@ -23,6 +23,7 @@ class Model(object):
             self.mask = tf.placeholder(tf.float32, [None, None], name='mask_batch_ph')
             self.target_ph = tf.placeholder(tf.float32, [None, 2], name='target_ph')
             self.lr = tf.placeholder(tf.float64, [])
+            self.gamma = tf.placeholder(tf.float64, [])
 
         # Embedding layer
         with tf.name_scope('Embedding_layer'):
@@ -71,7 +72,7 @@ class Model(object):
             # Cross-entropy loss and optimizer initialization
             ctr_loss = - tf.reduce_mean(tf.log(self.y_hat) * self.target_ph)
             self.loss = ctr_loss
-            gamma = 0.5
+            gamma = self.gamma
             if self.use_specloss:
                 self.loss += tf.reduce_mean(self.spectral_loss) * gamma
                 print("add spectral_loss")
