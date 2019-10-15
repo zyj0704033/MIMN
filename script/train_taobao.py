@@ -80,6 +80,7 @@ def eval(sess, test_data, model, model_path, batch_size):
     nums = 0
     stored_arr = []
     test_data_pool, _stop, _ = generator_queue(test_data)
+    gamma = 1
     while True:
         if  _stop.is_set() and test_data_pool.empty():
             break
@@ -92,7 +93,7 @@ def eval(sess, test_data, model, model_path, batch_size):
             continue
         nums += 1
         target = label
-        prob, loss, acc, aux_loss = model.calculate(sess, [nick_id, item_id, cate_id, hist_item, hist_cate, neg_item, neg_cate, hist_mask, label])
+        prob, loss, acc, aux_loss = model.calculate(sess, [nick_id, item_id, cate_id, hist_item, hist_cate, neg_item, neg_cate, hist_mask, label, gamma])
         loss_sum += loss
         aux_loss_sum = aux_loss
         accuracy_sum += acc
