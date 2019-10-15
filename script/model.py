@@ -23,7 +23,7 @@ class Model(object):
             self.mask = tf.placeholder(tf.float32, [None, None], name='mask_batch_ph')
             self.target_ph = tf.placeholder(tf.float32, [None, 2], name='target_ph')
             self.lr = tf.placeholder(tf.float64, [])
-            self.gamma = tf.placeholder(tf.float32, [None])
+            self.gamma = tf.placeholder(tf.float32, [])
 
         # Embedding layer
         with tf.name_scope('Embedding_layer'):
