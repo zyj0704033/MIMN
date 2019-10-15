@@ -400,7 +400,8 @@ def get_eigenvec(inputs, mask, use_svd=False):
     inputs =  tf.matmul(inputs, inputs, transpose_a=True) # b * embed * embed
     eigvec = power_iteration(inputs)[1]
     eigvec = tf.reshape(eigvec, [shape[0], shape[-1]])
-    
+    print("\33[35m eigenvec shape: \33[0m")
+    print(eigvec.shape.as_list)
     return eigvec
 
 
