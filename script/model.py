@@ -182,7 +182,7 @@ class Model(object):
                 self.gamma: inps[9]
             })
             aux_loss = spec_loss
-        if self.use_negsample:
+        elif self.use_negsample:
             probs, loss, accuracy, aux_loss = sess.run([self.y_hat, self.loss, self.accuracy, self.aux_loss], feed_dict={
                 self.uid_batch_ph: inps[0],
                 self.mid_batch_ph: inps[1],
