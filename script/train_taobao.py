@@ -80,7 +80,7 @@ def eval(sess, test_data, model, model_path, batch_size):
     nums = 0
     stored_arr = []
     test_data_pool, _stop, _ = generator_queue(test_data)
-    gamma = 1
+    gamma = 1.0
     while True:
         if  _stop.is_set() and test_data_pool.empty():
             break
