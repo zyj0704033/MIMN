@@ -208,7 +208,7 @@ def train(
                 sys.stdout.flush()
                 if (iter % 200 ) == 0:
                     print("iter: %d" %iter)
-                if iter > 2000:
+                if iter > 500:
                     gamma = 1.0
                 if iter < start_test_iter:
                     continue

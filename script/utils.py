@@ -426,8 +426,8 @@ def power_iteration(L, iteration=10):
         u_ = tf.matmul(v_hat, L)
         u_hat = tf.nn.l2_normalize(u_)
     
-    u_hat = tf.stop_gradient(u_hat)
-    v_hat = tf.stop_gradient(v_hat)
+    # u_hat = tf.stop_gradient(u_hat)
+    # v_hat = tf.stop_gradient(v_hat)
     sigma = tf.matmul(tf.matmul(v_hat, L), u_hat, transpose_b=True)
 
     return sigma
