@@ -190,7 +190,7 @@ def train(
             accuracy_sum = 0.
             aux_loss_sum = 0.
             train_data_pool,_stop,_ = generator_queue(train_data)
-            gamma = 0
+            gamma = 0.
             while True:
                 if  _stop.is_set() and train_data_pool.empty():
                     break
