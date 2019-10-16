@@ -423,6 +423,8 @@ def cal_cluster_loss(inputs, mask, dist_type='Euclid', use_svd=False):
     L = D - W
     L = tf.matmul(D_norm, L)
     L = tf.matmul(L, D_norm)
+    I = tf.eye(shape[1], batch_shape=shape[0])
+    L = L - 0.5 * I # friendly to power iteration
     if use_svd:
         s = tf.svd(L, compute_uv=False)
         s = s[:,0]
