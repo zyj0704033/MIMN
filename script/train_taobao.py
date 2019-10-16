@@ -209,7 +209,7 @@ def train(
                 if (iter % 200 ) == 0:
                     print("iter: %d" %iter)
                 if iter > 2200:
-                    gamma = 0.2
+                    gamma = 0
                 if iter < start_test_iter:
                     continue
                 if (iter % test_iter) == 0:
