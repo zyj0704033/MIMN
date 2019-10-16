@@ -154,7 +154,7 @@ def train(
         elif model_type == 'PNN': 
             model = Model_PNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'MIND': 
-            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num, is_attention=True, use_mask=False)
+            model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num, is_attention=False, use_mask=False)
         elif model_type == 'GRU4REC': 
             model = Model_GRU4REC(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'DIN': 
@@ -208,8 +208,8 @@ def train(
                 sys.stdout.flush()
                 if (iter % 200 ) == 0:
                     print("iter: %d" %iter)
-                if iter > 500:
-                    gamma = 1.0
+                if iter > 2200:
+                    gamma = 0.2
                 if iter < start_test_iter:
                     continue
                 if (iter % test_iter) == 0:
