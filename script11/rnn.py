@@ -42,7 +42,7 @@ from tensorflow.python.util import nest
 
 # pylint: disable=protected-access
 _concat = rnn_cell_impl._concat
-_like_rnncell = rnn_cell_impl._like_rnncell
+_like_rnncell = rnn_cell_impl.assert_like_rnncell
 # pylint: enable=protected-access
 
 
