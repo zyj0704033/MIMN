@@ -48,6 +48,7 @@ class Model(object):
             self.neg_his_eb = tf.concat([self.neg_item_his_eb,self.neg_cate_his_eb], axis=2) * tf.reshape(self.mask,(BATCH_SIZE, SEQ_LEN, 1))   
             
         self.item_eb = tf.concat([self.mid_batch_embedded, self.cate_batch_embedded], axis=1)
+        print(self.item_his_eb.shape.as_list())
         self.item_his_eb = tf.concat([self.mid_his_batch_embedded,self.cate_his_batch_embedded], axis=2) * tf.reshape(self.mask,(BATCH_SIZE, SEQ_LEN, 1))
         self.item_his_eb_sum = tf.reduce_sum(self.item_his_eb, 1)
 
