@@ -440,3 +440,18 @@ class Model_CDNN(Model):
             self.spectral_loss = cal_cluster_loss(self.item_his_eb, self.mask)
         inp = tf.concat([self.item_eb, self.item_his_eb_sum], 1)
         self.build_fcn_net(inp, use_dice=False)
+
+
+class Model_KMEANS(Model):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=5, is_attention=True):
+        super(Model_MIND, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
+                                           BATCH_SIZE, SEQ_LEN, Flag="MIND")
+        kmeans_ops = utils.kmeans(cluster_num=5)
+        cap_output = kmeans_ops(self.item_his_eb)
+        print(cap_output.shape) #(b, 3, 18)
+        if is_attention:
+            cap_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num)), dtype=tf.float32)
+            cap_output = din_attention(self.item_eb, cap_output, HIDDEN_SIZE, cap_mask)
+        cap_sum = tf.reduce_sum(cap_output, 1)
+        inp = tf.concat([self.item_eb, self.item_his_eb_sum, cap_sum], 1)
+        self.build_fcn_net(inp, use_dice=False)

@@ -366,6 +366,12 @@ def din_fcn_shine(query, facts, attention_size, mask, stag='null', mode='SUM', s
     return output
 
 
+def mask_to_length(data):
+    assert len(data.shape) > 2, "shape should be (batch_size, steps, ...)"
+    mask = tf.to_int32(tf.not_equal(tf.reduce_sum(data, axis=range(2, len(data.shape)), keepdims=True), 0))
+    length = tf.reduce_sum(mask, [1, 2])
+    return tf.to_float(mask), length
+
 def dist_matrix(inputs, mask, dist_type='Euclid'):
     # inputs : b * seq_len * embed_dim
     shape = inputs.shape.as_list()
@@ -523,7 +529,7 @@ def gradient_svd(op, grad_s, grad_u, grad_v):
     return dxdz
 '''
 class kmeans(object):
-    def __init__(self, cluster_num, max_iter=20, use_plus=False, self.distance_type='Euclid'):
+    def __init__(self, cluster_num, max_iter=20, use_plus=False, distance_type='Euclid'):
         self.cluster_num = cluster_num
         self.max_iter = max_iter
         self.use_plus = use_plus # wether use kmeans++
