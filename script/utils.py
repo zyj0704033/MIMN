@@ -522,3 +522,52 @@ def gradient_svd(op, grad_s, grad_u, grad_v):
     dxdz = tf.matmul(u, tf.matmul(2 * tf.matmul(realS, inner) + real_grad_S, v_t))
     return dxdz
 '''
+class kmeans(object):
+    def __init__(self, cluster_num, max_iter=20, use_plus=False, self.distance_type='Euclid'):
+        self.cluster_num = cluster_num
+        self.max_iter = max_iter
+        self.use_plus = use_plus # wether use kmeans++
+        self.distance_type = distance_type
+
+    def __call__(self, input):
+        '''
+        input: b * seq * e
+        return: center of the seq b * seq * e
+        '''
+        # initialization the centers
+        input_stop = tf.stop_gradient(input, name='kmeans_stop')
+        mask, length = mask_to_length(input_stop)
+        shape = input.shape.as_lit() # b * seq * e
+        centroids_idx = tf.to_int32(tf.floor(tf.random_uniform((1, self.cluster_num), minval=0, maxval=1) * shape[1]))
+        centroids = tf.gather(input_stop, centroids_idx[0,:], axis=1) # b * cn * e
+        # floop
+        for i in range(self.max_iter):
+            pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
+            passignment = tf.argmin(pdistance, axis=2) # b * seq
+            center_list = []
+            for k in range(self.cluster_num):
+                mask_k = tf.reshape(tf.to_float(tf.equal(passignment, k)), (shape[0], shape[1], 1)) # b * seq_len * 1
+                center_k = tf.reduce_sum(input_stop * mask_k, axis=1, keep_dims=True) # b * 1 * e
+                pkn = tf.ones(shape=(shape[0], shape[1], 1)) * mask * mask_k # b * seq_len * 1
+                pkn = tf.reduce_sum(pkn, axis=1, keep_dims=True) # b * 1 * 1
+                center_k = center_k / (pkn + 0.01)
+                center_list.append(center_k)
+            centroids = tf.concat(center_list, axis=1)
+        return centroids
+
+    def point_distance(self, inputs, centroids):
+        shape = inputs.shape.as_list()
+        if self.distance_type == 'cosian':
+            pass
+        if self.distance_type == 'Euclid':
+            mask, length  = mask_to_length(inputs)
+            inputs = inputs * mask
+            square_input = tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True) # b * seq_len * 1
+            sqx = tf.matmul(square_input, tf.ones(shape=(shape[0], 1, self.cluster_num))) # b * seq_len * cn
+            square_center = tf.reduce_sum(tf.square(centroids), axis=2, keep_dims=True) # b * cn * 1
+            sqy = tf.matmul(tf.ones(shape[0], shape[1], 1), square_center, transpose_b=True) # b * seq_len * cn
+            xy = tf.matmul(inputs, centroids, transpose_b=True) # b * seq_len * cn
+            dis_matrix = sqx + sqy - 2*xy + tf.constant(1e-6, dtype=tf.float32)
+            dis_matrix = tf.sqrt(dis_matrix)
+
+            return dis_matrix # b * seq_len * cn
