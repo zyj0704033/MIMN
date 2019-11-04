@@ -153,6 +153,8 @@ def train(
             model = Model_CDNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'PNN': 
             model = Model_PNN(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
+        elif model_type == 'KMEANS': 
+            model = Model_KMEANS(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN)
         elif model_type == 'MIND': 
             model = Model_MIND(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN, cluster_num = cluster_num, is_attention=False, use_mask=False)
         elif model_type == 'GRU4REC': 
