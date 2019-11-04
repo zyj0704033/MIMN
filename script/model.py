@@ -451,7 +451,7 @@ class Model_KMEANS(Model):
         print(centroids.shape) #(b, 3, 18)
         if is_attention:
             kmeans_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num)), dtype=tf.float32)
-            kmeans_output = din_attention(self.item_eb, cap_output, HIDDEN_SIZE, kmeans_mask)
+            kmeans_output = din_attention(self.item_eb, centroids, HIDDEN_SIZE, kmeans_mask)
         kmeans_sum = tf.reduce_sum(kmeans_output, 1)
         inp = tf.concat([self.item_eb, self.item_his_eb_sum, kmeans_sum], 1)
         self.build_fcn_net(inp, use_dice=False)
