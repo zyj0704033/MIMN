@@ -443,7 +443,7 @@ class Model_CDNN(Model):
 
 
 class Model_KMEANS(Model):
-    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=5, is_attention=True):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=5, is_attention=False):
         super(Model_KMEANS, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
                                            BATCH_SIZE, SEQ_LEN, Flag="KMEANS")
         kmeans_ops = kmeans(cluster_num=cluster_num)
@@ -452,6 +452,8 @@ class Model_KMEANS(Model):
         if is_attention:
             kmeans_mask = tf.constant(np.ones((BATCH_SIZE, cluster_num)), dtype=tf.float32)
             kmeans_output = din_attention(self.item_eb, centroids, HIDDEN_SIZE, kmeans_mask)
-        kmeans_sum = tf.reduce_sum(kmeans_output, 1)
+            kmeans_sum = tf.reduce_sum(kmeans_output, 1)
+        else:
+            kmeans_sum = tf.reduce_sum(centroids, 1)
         inp = tf.concat([self.item_eb, self.item_his_eb_sum, kmeans_sum], 1)
         self.build_fcn_net(inp, use_dice=False)
