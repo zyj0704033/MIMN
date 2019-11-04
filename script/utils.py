@@ -546,6 +546,8 @@ class kmeans(object):
         shape = input.shape.as_list() # b * seq * e
         centroids_idx = tf.to_int32(tf.floor(tf.random_uniform((1, self.cluster_num), minval=0, maxval=1) * shape[1]))
         centroids = tf.gather(input_stop, centroids_idx[0,:], axis=1) # b * cn * e
+        print("center shape")
+        print(centroids.shape.as_list())
         # floop
         for i in range(self.max_iter):
             pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
