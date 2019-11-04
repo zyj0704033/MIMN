@@ -543,7 +543,7 @@ class kmeans(object):
         # initialization the centers
         input_stop = tf.stop_gradient(input, name='kmeans_stop')
         mask, length = mask_to_length(input_stop)
-        shape = input.shape.as_lit() # b * seq * e
+        shape = input.shape.as_list() # b * seq * e
         centroids_idx = tf.to_int32(tf.floor(tf.random_uniform((1, self.cluster_num), minval=0, maxval=1) * shape[1]))
         centroids = tf.gather(input_stop, centroids_idx[0,:], axis=1) # b * cn * e
         # floop
