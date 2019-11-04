@@ -1,1 +1,1 @@
-CUDA_VISIBLE_DEVICES=0 python script/train_taobao.py -p train --random_seed 19 --model_type KMEANS --seq_minlen 0 --cluster_num=3 --epoch=1 --start_test_iter=200 --test_iter=200
+CUDA_VISIBLE_DEVICES=0 python script/train_taobao.py -p train --random_seed 19 --model_type KMEANS --seq_minlen 0 --cluster_num=3 --epoch=1 --start_test_iter=2500 --test_iter=100
