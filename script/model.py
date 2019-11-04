@@ -443,10 +443,10 @@ class Model_CDNN(Model):
 
 
 class Model_KMEANS(Model):
-    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=5, is_attention=True):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=3, is_attention=True):
         super(Model_KMEANS, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
                                            BATCH_SIZE, SEQ_LEN, Flag="KMEANS")
-        kmeans_ops = kmeans(cluster_num=5)
+        kmeans_ops = kmeans(cluster_num=cluster_num)
         centroids = kmeans_ops(self.item_his_eb)
         print(centroids.shape) #(b, 3, 18)
         if is_attention:
