@@ -529,7 +529,7 @@ def gradient_svd(op, grad_s, grad_u, grad_v):
     return dxdz
 '''
 class kmeans(object):
-    def __init__(self, cluster_num, max_iter=30, use_plus=False, distance_type='Euclid'):
+    def __init__(self, cluster_num, max_iter=50, use_plus=False, distance_type='Euclid'):
         self.cluster_num = cluster_num
         self.max_iter = max_iter
         self.use_plus = use_plus # wether use kmeans++
@@ -561,7 +561,7 @@ class kmeans(object):
                 center_k = center_k / (pkn + 0.01)
                 center_list.append(center_k)
             centroids = tf.concat(center_list, axis=1)
-        return centroids
+        return tf.stop_gradient(centroids, name='center_stop')
 
     def point_distance(self, inputs, centroids):
         shape = inputs.shape.as_list()
