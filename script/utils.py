@@ -573,7 +573,7 @@ class kmeans(object):
             square_input = tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True) # b * seq_len * 1
             sqx = tf.matmul(square_input, tf.ones(shape=(shape[0], 1, self.cluster_num))) # b * seq_len * cn
             square_center = tf.reduce_sum(tf.square(centroids), axis=2, keep_dims=True) # b * cn * 1
-            sqy = tf.matmul(tf.ones(shape[0], shape[1], 1), square_center, transpose_b=True) # b * seq_len * cn
+            sqy = tf.matmul(tf.ones((shape[0], shape[1], 1)), square_center, transpose_b=True) # b * seq_len * cn
             xy = tf.matmul(inputs, centroids, transpose_b=True) # b * seq_len * cn
             dis_matrix = sqx + sqy - 2*xy + tf.constant(1e-6, dtype=tf.float32)
             dis_matrix = tf.sqrt(dis_matrix)
