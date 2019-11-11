@@ -529,11 +529,12 @@ def gradient_svd(op, grad_s, grad_u, grad_v):
     return dxdz
 '''
 class kmeans(object):
-    def __init__(self, cluster_num, max_iter=20, use_plus=False, distance_type='Cosine'):
+    def __init__(self, cluster_num, max_iter=20, use_plus=False, distance_type='Cosine', stop_gradient=False):
         self.cluster_num = cluster_num
         self.max_iter = max_iter
         self.use_plus = use_plus # wether use kmeans++
         self.distance_type = distance_type
+        self.stop_gradient = stop_gradient
 
     def __call__(self, input):
         '''
@@ -549,24 +550,64 @@ class kmeans(object):
         print("center shape")
         print(centroids.shape.as_list())
         # floop
-        for i in range(self.max_iter):
-            pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
-            if self.distance_type == 'Cosine':
-                print "Cosine distance!"
-                cmask, clength = mask_to_length(centroids) # b * cn
-                mask_bias = tf.reshape((1 - cmask), [shape[0], self.cluster_num, 1]) # b * cn * 1
-                pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True) * 3
-            passignment = tf.argmin(pdistance, axis=2) # b * seq
-            center_list = []
-            for k in range(self.cluster_num):
-                mask_k = tf.reshape(tf.to_float(tf.equal(passignment, k)), (shape[0], shape[1], 1)) # b * seq_len * 1
-                center_k = tf.reduce_sum(input_stop * mask_k, axis=1, keep_dims=True) # b * 1 * e
-                pkn = tf.ones(shape=(shape[0], shape[1], 1)) * mask * mask_k # b * seq_len * 1
-                pkn = tf.reduce_sum(pkn, axis=1, keep_dims=True) # b * 1 * 1
-                center_k = center_k / (pkn + 0.01)
-                center_list.append(center_k)
-            centroids = tf.concat(center_list, axis=1)
-        return tf.stop_gradient(centroids, name='center_stop')
+        if self.stop_gradient:
+            for i in range(self.max_iter):
+                pdistance = self.point_distance(input_stop) # b * seq * cn
+                if self.distance_type == 'Cosine':
+                    print "Cosine distance!"
+                    cmask, clength = mask_to_length(centroids) # b * cn
+                    mask_bias = tf.reshape((1 - cmask), [shape[0], self.cluster_num, 1]) # b * cn * 1
+                    pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True) * 3
+                passignment = tf.argmin(pdistance, axis=2) # b * seq
+                center_list = []
+                for k in range(self.cluster_num):
+                    mask_k = tf.reshape(tf.to_float(tf.equal(passignment, k)), (shape[0], shape[1], 1)) # b * seq_len * 1
+                    center_k = tf.reduce_sum(input_stop * mask_k, axis=1, keep_dims=True) # b * 1 * e
+                    pkn = tf.ones(shape=(shape[0], shape[1], 1)) * mask * mask_k # b * seq_len * 1
+                    pkn = tf.reduce_sum(pkn, axis=1, keep_dims=True) # b * 1 * 1
+                    center_k = center_k / (pkn + 0.01)
+                    center_list.append(center_k)
+                centroids = tf.concat(center_list, axis=1)
+            return tf.stop_gradient(centroids, name='center_stop')
+        else:
+            for i in range(self.max_iter):
+                if i < self.max_iter-1:
+                    pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
+                    if self.distance_type == 'Cosine':
+                        print "Cosine distance!"
+                        cmask, clength = mask_to_length(centroids) # b * cn
+                        mask_bias = tf.reshape((1 - cmask), [shape[0], self.cluster_num, 1]) # b * cn * 1
+                        pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True) * 3
+                    passignment = tf.argmin(pdistance, axis=2) # b * seq
+                    center_list = []
+                    for k in range(self.cluster_num):
+                        mask_k = tf.reshape(tf.to_float(tf.equal(passignment, k)), (shape[0], shape[1], 1)) # b * seq_len * 1
+                        center_k = tf.reduce_sum(input_stop * mask_k, axis=1, keep_dims=True) # b * 1 * e
+                        pkn = tf.ones(shape=(shape[0], shape[1], 1)) * mask * mask_k # b * seq_len * 1
+                        pkn = tf.reduce_sum(pkn, axis=1, keep_dims=True) # b * 1 * 1
+                        center_k = center_k / (pkn + 0.01)
+                        center_list.append(center_k)
+                    centroids = tf.concat(center_list, axis=1)
+                elif i == self.max_iter-1:
+                    print "--------last iter!---------"
+                    pdistance = self.point_distance(input, centroids) # b * seq * cn
+                    if self.distance_type == 'Cosine':
+                        print "Cosine distance!"
+                        cmask, clength = mask_to_length(centroids) # b * cn
+                        mask_bias = tf.reshape((1 - cmask), [shape[0], self.cluster_num, 1]) # b * cn * 1
+                        pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True) * 3
+                    passignment = tf.argmin(pdistance, axis=2) # b * seq
+                    center_list = []
+                    for k in range(self.cluster_num):
+                        mask_k = tf.reshape(tf.to_float(tf.equal(passignment, k)), (shape[0], shape[1], 1)) # b * seq_len * 1
+                        center_k = tf.reduce_sum(input_stop * mask_k, axis=1, keep_dims=True) # b * 1 * e
+                        pkn = tf.ones(shape=(shape[0], shape[1], 1)) * mask * mask_k # b * seq_len * 1
+                        pkn = tf.reduce_sum(pkn, axis=1, keep_dims=True) # b * 1 * 1
+                        center_k = center_k / (pkn + 0.01)
+                        center_list.append(center_k)
+                    centroids = tf.concat(center_list, axis=1)
+            return centroids
+
 
     def point_distance(self, inputs, centroids):
         shape = inputs.shape.as_list() # b * seq_len * e
