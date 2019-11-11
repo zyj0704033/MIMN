@@ -555,7 +555,7 @@ class kmeans(object):
                 print "Cosine distance!"
                 cmask, clength = mask_to_length(centroids) # b * cn
                 mask_bias = tf.reshape((1 - cmask), [shape[0], self.cluster_num, 1]) # b * cn * 1
-                pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True)
+                pdistance = pdistance + tf.matmul(tf.ones(shape = (shape[0], shape[1], 1)), mask_bias, transpose_b=True) * 3
             passignment = tf.argmin(pdistance, axis=2) # b * seq
             center_list = []
             for k in range(self.cluster_num):
