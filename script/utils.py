@@ -450,10 +450,10 @@ def power_iteration(L, iteration=10):
     v_hat = None
     for i in range(iteration):
         v_ = tf.matmul(u_hat, L, transpose_b=True)
-        v_hat = tf.nn.l2_normalize(v_, dim=0)
+        v_hat = tf.nn.l2_normalize(v_, dim=2)
 
         u_ = tf.matmul(v_hat, L)
-        u_hat = tf.nn.l2_normalize(u_, dim=0)
+        u_hat = tf.nn.l2_normalize(u_, dim=2)
     
     # u_hat = tf.stop_gradient(u_hat)
     # v_hat = tf.stop_gradient(v_hat)
@@ -564,9 +564,16 @@ class kmeans(object):
         return tf.stop_gradient(centroids, name='center_stop')
 
     def point_distance(self, inputs, centroids):
-        shape = inputs.shape.as_list()
-        if self.distance_type == 'cosian':
-            pass
+        shape = inputs.shape.as_list() # b * seq_len * e
+        if self.distance_type == 'Cosian':
+            mask, length = mask_to_length(inputs)
+            inputs = inputs * mask 
+            xy = tf.matmul(inputs, centroids, transpose_b=True) # b * seq_len * cn
+            x_norm = tf.sqrt(tf.reduce_sum(tf.square(inputs), axis=2, keep_dims=True)) # b * seq_len * 1
+            y_norm = tf.sqrt(tf.reduce_sum(tf.square(centroids), axis=2, keep_dims=True)) # b * cn * 1
+            dis_matrix = xy / (tf.matmul(x_norm, y_norm, transpose_b=True) + 0.000000001) # b * seq_len * cn
+            return dis_matrix
+
         if self.distance_type == 'Euclid':
             mask, length  = mask_to_length(inputs)
             inputs = inputs * mask
