@@ -5,7 +5,7 @@ import tensorflow as tf
 from utils import kmeans
 
 cn = 10
-X, y_true = make_blobs(n_samples=150, centers=4,
+X, y_true = make_blobs(n_samples=150, centers=5,
                        cluster_std=0.5, random_state=10)
 kmeans_ops = kmeans(cluster_num=cn)
 mask = np.concatenate([np.ones((100,2)), np.zeros((50, 2))], axis=0)
