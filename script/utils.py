@@ -552,7 +552,7 @@ class kmeans(object):
         # floop
         if self.stop_gradient:
             for i in range(self.max_iter):
-                pdistance = self.point_distance(input_stop) # b * seq * cn
+                pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
                 if self.distance_type == 'Cosine':
                     print "Cosine distance!"
                     cmask, clength = mask_to_length(centroids) # b * cn
