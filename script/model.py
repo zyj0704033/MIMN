@@ -443,7 +443,7 @@ class Model_CDNN(Model):
 
 
 class Model_KMEANS(Model):
-    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=5, is_attention=False):
+    def __init__(self,n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, BATCH_SIZE, SEQ_LEN=256, cluster_num=10, is_attention=False):
         super(Model_KMEANS, self).__init__(n_uid, n_mid, EMBEDDING_DIM, HIDDEN_SIZE, 
                                            BATCH_SIZE, SEQ_LEN, Flag="KMEANS")
         kmeans_ops = kmeans(cluster_num=cluster_num)

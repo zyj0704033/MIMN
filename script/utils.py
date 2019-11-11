@@ -529,7 +529,7 @@ def gradient_svd(op, grad_s, grad_u, grad_v):
     return dxdz
 '''
 class kmeans(object):
-    def __init__(self, cluster_num, max_iter=20, use_plus=False, distance_type='Cosine', stop_gradient=True):
+    def __init__(self, cluster_num, max_iter=20, use_plus=False, distance_type='Cosine', stop_gradient=False):
         self.cluster_num = cluster_num
         self.max_iter = max_iter
         self.use_plus = use_plus # wether use kmeans++
