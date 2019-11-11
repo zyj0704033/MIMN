@@ -450,10 +450,10 @@ def power_iteration(L, iteration=10):
     v_hat = None
     for i in range(iteration):
         v_ = tf.matmul(u_hat, L, transpose_b=True)
-        v_hat = tf.nn.l2_normalize(v_, dim=2)
+        v_hat = tf.nn.l2_normalize(v_, dim=0)
 
         u_ = tf.matmul(v_hat, L)
-        u_hat = tf.nn.l2_normalize(u_, dim=2)
+        u_hat = tf.nn.l2_normalize(u_, dim=0)
     
     # u_hat = tf.stop_gradient(u_hat)
     # v_hat = tf.stop_gradient(v_hat)
@@ -551,6 +551,7 @@ class kmeans(object):
         # floop
         for i in range(self.max_iter):
             pdistance = self.point_distance(input_stop, centroids) # b * seq * cn
+            cmask, clength = mask_to_length()
             passignment = tf.argmin(pdistance, axis=2) # b * seq
             center_list = []
             for k in range(self.cluster_num):
