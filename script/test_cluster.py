@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 # X = X * mask
 # points = tf.constant(X, dtype=tf.float32)
 # centers = kmeans_ops(tf.reshape(points, [1] + points.shape.as_list()))
-# with tf.Session() as sess:
+# gpu_options = tf.GPUOptions(allow_growth=True)
+# with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 #     predict = sess.run(centers)
 # print(predict)
 # y = y_true.reshape((-1, 1))
