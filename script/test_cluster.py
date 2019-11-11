@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 # cn = 10
 # X, y_true = make_blobs(n_samples=150, centers=4,
-#                        cluster_std=0.5, random_state=4)
+#                        cluster_std=0.5, random_state=10)
 # kmeans_ops = kmeans(cluster_num=cn)
 # mask = np.concatenate([np.ones((100,2)), np.zeros((50, 2))], axis=0)
 # X = X * mask
