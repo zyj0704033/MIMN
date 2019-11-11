@@ -571,7 +571,7 @@ class kmeans(object):
 
     def point_distance(self, inputs, centroids):
         shape = inputs.shape.as_list() # b * seq_len * e
-        if self.distance_type == 'Cosian':
+        if self.distance_type == 'Cosine':
             mask, length = mask_to_length(inputs)
             inputs = inputs * mask 
             xy = tf.matmul(inputs, centroids, transpose_b=True) # b * seq_len * cn
